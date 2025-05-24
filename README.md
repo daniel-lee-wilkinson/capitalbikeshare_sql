@@ -37,7 +37,7 @@ All visualisations were generated in Python with matplotlib and folium. The code
 |---------------------------------------------|---------------------------------------------------------------------|
 | Trips by Time of Day          | Distribution of Trip Durations                        |
 
-| <img src="figures/trips_by_weekday.png" width="400px">| <img src="figures/map.png" width="400px">  |
+| ![Trips by Weekday](figures/trips_by_weekday.png)| ![Top Start Stations Map](figures/map.png) |
 |------------------------------------------------------------|--------------------------------------------------------------|
 | Trips by Weekday                                           |Top Start Stations (Map)                       |
 
