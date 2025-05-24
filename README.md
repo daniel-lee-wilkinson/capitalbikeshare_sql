@@ -37,9 +37,9 @@ All visualisations were generated in Python with matplotlib and folium. The code
 |---------------------------------------------|---------------------------------------------------------------------|
 | Trips by Time of Day          | Distribution of Trip Durations                        |
 
-| ![Trips by Weekday](figures/trips_by_weekday.png) | ![Top Start Stations Map](figures/map_top_stations.png) |
-|---------------------------------------------------|--------------------------------------------------------------|
-| Trips by Weekday                    |Top Start Stations (Map)                       |
+| <img src="figures/trips_by_weekday.png" width="400px">| <img src="figures/map.png" width="400px">  |
+|------------------------------------------------------------|--------------------------------------------------------------|
+| Trips by Weekday                                           |Top Start Stations (Map)                       |
 
 
 
@@ -86,7 +86,7 @@ LIMIT 10;
 | M St & Delaware Ave NE          | 3341       |
 | 14th & R St NW                  | 3166       |
 
-![Map of Most Popular Starting Stations](figures/map_top_stations.png)
+![Map of Most Popular Starting Stations](figures/map.png)
 **Figure 1:** The 10 most popular starting stations in April 2025.
 
 The popularity of these stations can be explained by their proximity to major activity hubs. Columbus Circle/Union Station is the city's main intermodal hub so it is a natural starting point for commuters and tourists. Three of the top ten are at residential-commercial border zones (New Hampsire Ave & T St NW, 14th & V St NW and 14th & R St NW). Three sit on the edge of core business districts, so they should be popular with commuters (5th & K St NW, 15th & P St NW and 1st & M St NW).  The civic and tourist areas affect the popularity of Eastern Market Metro and Adams Mill & Columbia Rd MW. Then M St & Delaware Ave NW serves densely populated neighbourhoods and likely functions as a residential-metro connector.
