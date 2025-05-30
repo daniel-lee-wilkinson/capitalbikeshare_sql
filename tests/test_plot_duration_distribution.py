@@ -1,14 +1,10 @@
-
+from config import FIGURES_DIR
 from python_scripts.plots import plot_duration_distribution
 
-
-from config import FIGURES_DIR
-import os
 
 def test_plot_created():
     expected_file = FIGURES_DIR / "trips_by_hour.png"
     assert expected_file.exists()
-
 
 
 def test_plot_duration_distribution_output_file():

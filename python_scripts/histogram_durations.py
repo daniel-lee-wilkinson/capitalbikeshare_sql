@@ -13,7 +13,8 @@ plt.xlabel("Trip Duration (minutes)")
 plt.ylabel("Number of Trips")
 # plt.grid(axis='y')
 plt.tight_layout()
-plt.savefig( FIGURES_DIR /  "trip_duration_distribution.png",
+plt.savefig(
+    FIGURES_DIR / "trip_duration_distribution.png",
     dpi=300,
     bbox_inches="tight",
 )

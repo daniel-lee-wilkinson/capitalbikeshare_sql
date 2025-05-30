@@ -1,6 +1,7 @@
-import pandas as pd
+import folium
 import matplotlib.pyplot as plt
-from pathlib import Path
+import pandas as pd
+
 from config import FIGURES_DIR
 
 
@@ -58,9 +59,6 @@ def plot_duration_distribution(
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close()
-
-
-import folium
 
 
 def save_top_stations_map(df: pd.DataFrame, filename: str = "top_stations_map.html"):

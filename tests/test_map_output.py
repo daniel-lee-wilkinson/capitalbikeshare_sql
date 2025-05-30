@@ -1,4 +1,5 @@
 import pandas as pd
+
 from config import FIGURES_DIR
 from python_scripts.plots import save_top_stations_map
 

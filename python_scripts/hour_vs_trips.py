@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+
 from config import FIGURES_DIR
 
 # Data

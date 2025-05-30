@@ -1,7 +1,8 @@
 import pandas as pd
-from pathlib import Path
+
+from config import FIGURES_DIR
 from python_scripts.plots import plot_weekday_trips
-from config import FIGURES_DIR 
+
 
 def test_plot_weekday_output_file():
     df = pd.DataFrame(

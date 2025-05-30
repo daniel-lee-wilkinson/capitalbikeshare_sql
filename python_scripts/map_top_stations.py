@@ -1,6 +1,5 @@
-import pandas as pd
 import folium
-
+import pandas as pd
 
 # Load data
 df = pd.read_csv(

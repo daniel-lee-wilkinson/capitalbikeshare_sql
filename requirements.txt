@@ -2,6 +2,7 @@ matplotlib>=3.10.3
 pandas~=2.2.3
 folium~=0.19.6
 flake8
+ruff
 black
 pytest
 
