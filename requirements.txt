@@ -6,4 +6,8 @@ ruff
 black
 pytest
 
-
+google-cloud-bigquery
+db-dtypes
+geopandas
+folium
+streamlit_folium
