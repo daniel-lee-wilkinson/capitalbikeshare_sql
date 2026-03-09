@@ -53,6 +53,33 @@ This project was significantly enhanced in May 2025 with the following additions
 
 These improvements make the project reproducible, extendable, and more maintainable for future updates and analyses.
 
+## March 2026: BigQuery Integration & Enhanced Workflows
+
+The project has been further extended with cloud-based analytics and improved testing infrastructure:
+
+### BigQuery Integration
+* **Cloud-ready SQL queries**: All core SQL analyses (trip pairs, hourly patterns, duration distributions, weekday trends, station rankings) migrated to BigQuery under `bigquery_queries/`
+* **Python query execution**: `scripts.py` provides reusable functions to run BigQuery SQL and save results as CSV for downstream processing
+* **Interactive exploration**: Jupyter notebook (`eda.ipynb`) demonstrates how to execute queries, process results, and generate visualizations interactively
+* **Visualisation pipeline**: `plotting.py` and `app.py` transform BigQuery CSV outputs into publication-ready maps and charts using matplotlib and folium
+
+### CSV-Based Workflow
+* **Decoupled data and visualisation**: BigQuery exports query results to CSV (`processed_data/`), enabling offline plotting and faster iteration
+* **Portable outputs**: Generated CSVs (e.g., `top_stations.csv`) can be version-controlled, shared, and reused without re-running expensive queries
+* **Local and cloud flexibility**: Plots can be generated from either SQLite (local) or BigQuery (cloud) data sources
+
+### Enhanced Modularity
+* **Separation of concerns**: Query logic, data processing, and visualisation are isolated in dedicated modules
+* **Reusable components**: Functions in `scripts.py` and `plotting.py` support multiple query types and output formats
+* **Configuration management**: Centralized `config.py` ensures consistent paths across local and CI environments
+
+### Robust Testing & CI
+* **Expanded test coverage**: New tests validate BigQuery script imports, plotting functions, and CSV processing workflows
+* **Import path resolution**: `conftest.py` ensures `config.py` and project modules are discoverable in all environments (local, Docker, GitHub Actions)
+* **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
+
+These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
+
 # Visual Summary
 
 | ![Trips by Hour](figures/trips_by_hour.png) | ![Trip Duration Histogram](figures/trip_duration_distribution.png) |
