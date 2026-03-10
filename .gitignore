@@ -27,3 +27,7 @@ __pycache__/
 .mypy_cache/
 # Ignore all .coverage files
 .coverage
+
+.pytest_cache/
+.ruff_cache/
+.flake8/
