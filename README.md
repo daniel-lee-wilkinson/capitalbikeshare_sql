@@ -119,9 +119,17 @@ These enhancements position the project for scalable cloud analytics while maint
 
 The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](heatmap.html).
 
-<iframe src="heatmap.html" width="100%" height="620" title="Capital Bikeshare BigQuery Heatmap"></iframe>
+GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
 
-If your Markdown viewer does not render embedded HTML, open the file directly: [View interactive heatmap](heatmap.html).
+Open the interactive output directly: [View interactive heatmap](heatmap.html).
+
+To preview locally in a browser:
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/heatmap.html`.
 
 # Visual Summary
 
