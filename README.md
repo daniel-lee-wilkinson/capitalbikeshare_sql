@@ -90,16 +90,6 @@ streamlit run bigquery_queries/app.py
 ```
 
 ---
-
-## Visual Summary
-| ![Trips by Hour](figures/trips_by_hour.png) | ![Trip Duration Histogram](figures/trip_duration_distribution.png) |
-|---|---|
-| Trips by Time of Day | Distribution of Trip Durations |
-
-| ![Trips by Weekday](figures/trips_by_weekday.png) | ![Top Start Stations Map](figures/map.png) |
-|---|---|
-| Trips by Weekday | Top Start Stations (Map) |
-
 ### BigQuery heatmap showcase
 ![BigQuery Heatmap Screenshot](screenshot_heatmap.png)
 
