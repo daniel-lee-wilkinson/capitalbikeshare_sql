@@ -1,3 +1,27 @@
 *.db
 .idea/
 *.csv
+# Ignore all .pyc files
+*.pyc
+# Ignore all .pyo files
+*.pyo
+# Ignore all .pyd files
+*.pyd
+# Ignore all __pycache__ directories
+__pycache__/
+# Ignore all .ipynb_checkpoints directories
+.ipynb_checkpoints/
+# Ignore all .vscode directories
+.vscode/
+# Ignore all .DS_Store files (macOS)
+.DS_Store
+# Ignore all .env files
+.env
+# Ignore all .venv directories
+.venv/
+# Ignore all .pytest_cache directories
+.pytest_cache/
+# Ignore all .mypy_cache directories
+.mypy_cache/
+# Ignore all .coverage files
+.coverage
