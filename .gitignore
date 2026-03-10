@@ -21,6 +21,8 @@ __pycache__/
 .venv/
 # Ignore all .pytest_cache directories
 .pytest_cache/
+# Ignore all .ruff_cache directories
+.ruff_cache/
 # Ignore all .mypy_cache directories
 .mypy_cache/
 # Ignore all .coverage files

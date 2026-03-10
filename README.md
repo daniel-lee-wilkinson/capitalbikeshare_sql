@@ -58,6 +58,41 @@ streamlit run bigquery_queries/app.py
 ```
 
 
+
+2. Run quality checks and tests:
+
+```bash
+ruff check . --fix
+black .
+flake8 .
+pytest tests/
+```
+
+3. SQLite workflow (local analysis):
+
+* SQL query files are in `sql_scripts/` and use the `trips` table.
+* Plot/map generation utilities are in `python_scripts/` with outputs saved to `figures/`.
+
+4. BigQuery workflow (cloud analysis + interactive heatmap):
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp_key.json
+export BQ_PROJECT_ID=capitalbikeshare-489408
+export BQ_TABLE_ID=capitalbikeshare-489408.02_2026.tripdata
+# optional: export BQ_OUTPUT_CSV=tripdata.csv
+python bigquery_queries/scripts.py
+python bigquery_queries/plotting.py
+```
+
+This produces `tripdata.csv` (query output) and `heatmap.html` (interactive Plotly map).
+
+5. Optional interactive app:
+
+```bash
+streamlit run bigquery_queries/app.py
+```
+
+
 # SQL and Engineering Skills Demonstrated
 
 * Filtering and cleaning data using `WHERE`, `IS NOT NULL`, and outlier logic
@@ -73,6 +108,65 @@ streamlit run bigquery_queries/app.py
 SQLite was selected for simple, portable local analysis and reproducible SQL exploration. BigQuery was added to support larger-scale cloud querying and faster iteration over grouped spatial outputs. Visualisations are generated with matplotlib and folium for the SQLite workflow, and with Plotly/Folium for the BigQuery workflow. Outputs are saved in `figures/` (static images/maps) and `heatmap.html` (interactive output).
 
 # Project Updates
+
+This project was significantly enhanced in May 2025 with the following additions:
+
+* Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
+* Automated plot generation for all major SQL outputs
+* `pytest`-based test suite to ensure figures are created and contain data
+* CI/CD integration using GitHub Actions (`.github/workflows/ci.yml`) to automate lint checks and test execution
+* Code formatting (`black`) and linting (`flake8`, `ruff`) configured and documented
+* Logical file structure:
+  - `python_scripts/`: plotting and SQL query logic
+  - `tests/`: validation of script outputs
+  - `figures/`: generated charts and maps
+
+These improvements make the project reproducible, extendable, and more maintainable for future updates and analyses.
+
+## March 2026: BigQuery Integration & Enhanced Workflows
+
+The project has been further extended with cloud-based analytics and improved testing infrastructure:
+
+### BigQuery Integration
+* **Cloud-ready query workflow**: BigQuery query execution is implemented in `bigquery_queries/scripts.py` and demonstrated in `bigquery_queries/eda.ipynb`
+* **Python query execution**: `scripts.py` reads `BQ_PROJECT_ID`, `BQ_TABLE_ID`, and optional `BQ_OUTPUT_CSV`, runs a grouped BigQuery query (weekday/member/location trip counts), and saves results for downstream plotting
+* **Interactive exploration**: Jupyter notebook (`eda.ipynb`) demonstrates how to execute queries, process results, and generate visualizations interactively
+* **Visualisation pipeline**: `plotting.py` and `app.py` transform BigQuery CSV outputs into interactive HTML maps/charts using Plotly and Folium
+
+### CSV-Based Workflow
+* **Decoupled data and visualisation**: The BigQuery workflow writes query results to CSV (`tripdata.csv`) so plotting can run offline
+* **Portable outputs**: Generated CSV artifacts can be version-controlled, shared, and reused without re-running expensive queries
+* **Local and cloud flexibility**: Plots can be generated from either SQLite (local) or BigQuery (cloud) data sources
+
+### Enhanced Modularity
+* **Separation of concerns**: Query logic, data processing, and visualisation are isolated in dedicated modules
+* **Reusable components**: Functions in `scripts.py` and `plotting.py` support multiple query types and output formats
+* **Configuration management**: Centralized `config.py` ensures consistent paths across local and CI environments
+
+### Robust Testing & CI
+* **Expanded test coverage**: Tests validate plotting functions, HTML/PNG artifact creation, and BigQuery plotting module imports
+* **Import path resolution**: `conftest.py` ensures `config.py` and project modules are discoverable in all environments (local, Docker, GitHub Actions)
+* **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
+
+These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
+
+## BigQuery Heatmap Showcase
+
+The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
+
+GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
+
+[![Heatmap Screenshot](screenshot_heatmap.png)](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html)
+
+Open the interactive output directly: [View interactive heatmap](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
+
+To preview locally in a browser:
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/heatmap.html`.
 
 This project was significantly enhanced in May 2025 with the following additions:
 
