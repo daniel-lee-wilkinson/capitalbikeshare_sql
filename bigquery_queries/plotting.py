@@ -41,6 +41,14 @@ def build_heatmap_figure(df: pd.DataFrame) -> go.Figure:
         [0.75, "orangered"],
         [1.0, "darkred"],
     ]
+    bin_labels = ["0-5", "5-15", "15-30", "30-50", "50+"]
+
+    def chart_title(group_name: str) -> str:
+        return (
+            f"Capital Bikeshare - {group_name}"
+            "<br><sup>Color scale = mean trips per location: "
+            "1: 0-5, 2: 5-15, 3: 15-30, 4: 30-50, 5: 50+</sup>"
+        )
 
     center_lat = df["start_lat"].mean()
     center_lon = df["start_lng"].mean()
@@ -62,6 +70,7 @@ def build_heatmap_figure(df: pd.DataFrame) -> go.Figure:
                 lat=day_data["start_lat"],
                 lon=day_data["start_lng"],
                 z=day_data["trip_bin"],
+                customdata=day_data[["trip_count"]],
                 radius=15,
                 name=f"{group} - {rider_type}",
                 visible=(group == "1. Weekday (Mon–Thu)"),
@@ -69,6 +78,20 @@ def build_heatmap_figure(df: pd.DataFrame) -> go.Figure:
                 zmin=1,
                 zmax=5,
                 showscale=(col == 2),
+                colorbar=(
+                    dict(
+                        title="Mean trips",
+                        tickvals=[1, 2, 3, 4, 5],
+                        ticktext=bin_labels,
+                    )
+                    if col == 2
+                    else None
+                ),
+                hovertemplate=(
+                    "Lat: %{lat:.4f}<br>Lon: %{lon:.4f}<br>"
+                    "Mean trips: %{customdata[0]:.1f}<br>"
+                    "Trip bin: %{z:.0f}<extra></extra>"
+                ),
             )
             fig.add_trace(trace, row=1, col=col)
 
@@ -84,7 +107,7 @@ def build_heatmap_figure(df: pd.DataFrame) -> go.Figure:
                 method="update",
                 args=[
                     {"visible": visibility},
-                    {"title": f"Capital Bikeshare — {group}"},
+                    {"title": chart_title(group)},
                 ],
             )
         )
@@ -106,7 +129,7 @@ def build_heatmap_figure(df: pd.DataFrame) -> go.Figure:
                 y=1.08,
             )
         ],
-        title="Capital Bikeshare — Weekday (Mon–Thu)",
+        title=chart_title("Weekday (Mon-Thu)"),
         height=600,
     )
     return fig
