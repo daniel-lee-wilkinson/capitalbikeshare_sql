@@ -152,6 +152,8 @@ These enhancements position the project for scalable cloud analytics while maint
 
 ## BigQuery Heatmap Showcase
 
+![BigQuery Heatmap Screenshot](screenshot_heatmap.png)
+
 The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
 This project was significantly enhanced in May 2025 with the following additions:
