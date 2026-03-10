@@ -154,6 +154,8 @@ These enhancements position the project for scalable cloud analytics while maint
 
 The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
+![BigQuery Heatmap Screenshot](screenshot_heatmap.png)
+
 This project was significantly enhanced in May 2025 with the following additions:
 
 * Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
