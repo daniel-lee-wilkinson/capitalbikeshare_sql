@@ -109,11 +109,12 @@ If you want a quick browser preview without cloning, you can use an HTML preview
 ---
 
 ## SQL & Engineering Skills Demonstrated
-- Filtering/cleaning: `WHERE`, `IS NOT NULL`, basic outlier logic
+- Filtering/cleaning: `WHERE`, `IS NOT NULL`, positive-duration guards to exclude data entry errors
 - Aggregation: `GROUP BY`, `COUNT`, `AVG`
 - Time-series analysis: `strftime()`, `julianday()`
 - Categorization: `CASE WHEN`
-- Subqueries and nested `SELECT`s
+- CTEs (`WITH` clauses) to improve query readability and separate data-prep logic from aggregation
+- Window functions (`SUM(...) OVER ()`) to compute group shares in a single pass, avoiding correlated subqueries
 - Python-based pipelines for SQLite + BigQuery outputs
 - Automated testing with `pytest`
 - Formatting/linting: `black`, `flake8`, `ruff`
@@ -259,10 +260,13 @@ To analyze ride activity by time of day, we extract the hour from each ride’s 
 
 The timestamps are ISO-like datetime strings with milliseconds (e.g. `2025-04-30 23:59:58.007`), but for this analysis we only need the **hour of day**. SQLite’s `strftime('%H', started_at)` extracts the hour (00–23).
 
+A `WHERE started_at IS NOT NULL` guard is added so that rows with missing timestamps do not silently contribute to the counts (SQLite returns `NULL` from `strftime` for NULL inputs, which creates a spurious `NULL` hour group rather than raising an error).
+
 #### Query
 ```sql
 SELECT strftime('%H', started_at) AS hour, COUNT(*) AS trip_count
 FROM trips
+WHERE started_at IS NOT NULL
 GROUP BY hour
 ORDER BY hour;
 ```
@@ -278,13 +282,20 @@ There are two peak periods that line up with commuting patterns: **morning (7–
 ### How long is the average trip?
 The average trip duration (in minutes) can be computed by subtracting start time from end time, converting the difference from days to minutes, and averaging across all trips.
 
-SQLite’s `julianday(datetime)` converts timestamps to a Julian day number. Subtracting two Julian day values gives a duration in **days**, so we multiply by `1440` (24 * 60) to convert to minutes. We round to one decimal place for readability.
+SQLite’s `julianday(datetime)` converts timestamps to a Julian day number. Subtracting two Julian day values gives a duration in **days**, so we multiply by `1440` (24 hours/day × 60 minutes/hour) to convert from days to minutes. We round to one decimal place for readability.
+
+Before averaging, three data quality conditions are applied:
+- `started_at IS NOT NULL` and `ended_at IS NOT NULL` — excludes rows where timestamps were never recorded
+- `julianday(ended_at) > julianday(started_at)` — removes zero-duration and negative-duration records, which indicate docking errors or data entry issues
 
 #### Query
 ```sql
 SELECT
   ROUND(AVG((julianday(ended_at) - julianday(started_at)) * 1440), 1) AS avg_trip_minutes
-FROM trips;
+FROM trips
+WHERE started_at IS NOT NULL
+  AND ended_at IS NOT NULL
+  AND julianday(ended_at) > julianday(started_at);
 ```
 
 #### Results
@@ -295,18 +306,20 @@ The mean trip duration is **16.1 minutes**. Since the mean is sensitive to outli
 ### What is the distribution of trip durations (short, medium and long)?
 The goal is to group bike trips into duration categories and count how many fall into each category. The results are shown as a histogram.
 
-We first compute duration in minutes in a subquery. Then an outer query uses a `CASE` expression to bin trips into labeled categories and counts how many fall into each bin.
+Duration is computed from `started_at` and `ended_at` using `julianday()`, then converted to minutes. The same data quality filters from the previous query are applied here: rows with NULL timestamps and rows where the end time is not strictly after the start time are excluded before binning.
 
-#### Query (subquery)
-```sql
-SELECT
-  (julianday(ended_at) - julianday(started_at)) * 1440 AS duration_min
-FROM trips
-WHERE started_at IS NOT NULL AND ended_at IS NOT NULL
-```
+The query is structured as a CTE (`WITH trip_durations AS (...)`) to cleanly separate the data-preparation step — computing duration and filtering bad rows — from the aggregation step that bins and counts trips. This is equivalent to the inline subquery approach but is easier to read, test, and extend.
 
-#### Query (full)
+#### Query
 ```sql
+WITH trip_durations AS (
+  SELECT
+    (julianday(ended_at) - julianday(started_at)) * 1440 AS duration_min
+  FROM trips
+  WHERE started_at IS NOT NULL
+    AND ended_at IS NOT NULL
+    AND julianday(ended_at) > julianday(started_at)
+)
 SELECT
   CASE
     WHEN duration_min <= 5 THEN '0–5 min'
@@ -315,12 +328,7 @@ SELECT
     ELSE '30+ min'
   END AS duration_category,
   COUNT(*) AS trip_count
-FROM (
-  SELECT
-    (julianday(ended_at) - julianday(started_at)) * 1440 AS duration_min
-  FROM trips
-  WHERE started_at IS NOT NULL AND ended_at IS NOT NULL
-) AS sub
+FROM trip_durations
 GROUP BY duration_category
 ORDER BY trip_count DESC;
 ```
@@ -340,27 +348,59 @@ The goal is to identify which days of the week have the most trips, based on the
 
 SQLite’s `strftime('%w', started_at)` returns weekday codes with **0 = Sunday** through **6 = Saturday**.
 
+Both queries are structured as CTEs: the CTE counts trips per weekday number once, and the outer query translates the numeric code to a human-readable name and applies the desired sort order. Separating aggregation from presentation logic in this way avoids re-evaluating `strftime` in both the `SELECT` and `ORDER BY` clauses and makes the intent of each step explicit.
+
 #### Query (ordered by trip volume)
 ```sql
+WITH weekday_trips AS (
+  SELECT
+    strftime('%w', started_at) AS weekday_num,
+    COUNT(*) AS trip_count
+  FROM trips
+  WHERE started_at IS NOT NULL
+  GROUP BY weekday_num
+)
 SELECT
-  strftime('%w', started_at) AS weekday,
-  COUNT(*) AS trip_count
-FROM trips
-WHERE started_at IS NOT NULL
-GROUP BY weekday
+  CASE weekday_num
+    WHEN '0' THEN 'Sunday'
+    WHEN '1' THEN 'Monday'
+    WHEN '2' THEN 'Tuesday'
+    WHEN '3' THEN 'Wednesday'
+    WHEN '4' THEN 'Thursday'
+    WHEN '5' THEN 'Friday'
+    WHEN '6' THEN 'Saturday'
+    ELSE 'Unknown'
+  END AS weekday_name,
+  trip_count
+FROM weekday_trips
 ORDER BY trip_count DESC;
 ```
 
 #### Query (ordered Monday → Sunday)
 ```sql
+WITH weekday_trips AS (
+  SELECT
+    strftime('%w', started_at) AS weekday_num,
+    COUNT(*) AS trip_count
+  FROM trips
+  WHERE started_at IS NOT NULL
+  GROUP BY weekday_num
+)
 SELECT
-  strftime('%w', started_at) AS weekday,
-  COUNT(*) AS trip_count
-FROM trips
-WHERE started_at IS NOT NULL
-GROUP BY weekday
+  CASE weekday_num
+    WHEN '0' THEN 'Sunday'
+    WHEN '1' THEN 'Monday'
+    WHEN '2' THEN 'Tuesday'
+    WHEN '3' THEN 'Wednesday'
+    WHEN '4' THEN 'Thursday'
+    WHEN '5' THEN 'Friday'
+    WHEN '6' THEN 'Saturday'
+    ELSE 'Unknown'
+  END AS weekday_name,
+  trip_count
+FROM weekday_trips
 ORDER BY
-  CASE strftime('%w', started_at)
+  CASE weekday_num
     WHEN '1' THEN 1  -- Monday
     WHEN '2' THEN 2
     WHEN '3' THEN 3
@@ -372,7 +412,7 @@ ORDER BY
 ```
 
 #### Results
-The results below are ordered by the number of trips (and the weekday labels were manually written out for readability).
+The results below are ordered by the number of trips. Weekday names are now produced directly by the SQL query rather than added manually after the fact.
 
 **Table 3:** Number of trips per weekday in April 2025.
 
@@ -396,14 +436,14 @@ If you view the chart ordered Monday-to-Sunday, the midweek peak becomes especia
 ### What share of rides are taken by members vs casual ride sharers?
 Journeys are grouped by whether the rider is a member of the bikeshare service or not. The goal is to quantify both the trip counts and the share of total rides.
 
-We count trips per rider type and compute percentages relative to total trips. Using `100.0 * ...` ensures floating-point division (not integer division).
+We count trips per rider type and compute percentages using a **window function**. `SUM(COUNT(*)) OVER ()` computes the grand total across all groups in the same pass as the per-group counts, removing the need for a correlated subquery (`SELECT COUNT(*) FROM trips`) that scans the table a second time. Using `100.0 * ...` ensures floating-point division rather than integer division.
 
 #### Query
 ```sql
 SELECT
   member_casual,
   COUNT(*) AS trip_count,
-  ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM trips), 1) AS percent_of_total
+  ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS percent_of_total
 FROM trips
 GROUP BY member_casual;
 ```
