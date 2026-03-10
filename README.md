@@ -164,16 +164,6 @@ The project has been further extended with cloud-based analytics and improved te
 
 These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
 
-# Visual Summary
-
-| ![Trips by Hour](figures/trips_by_hour.png) | ![Trip Duration Histogram](figures/trip_duration_distribution.png) |
-|---------------------------------------------|---------------------------------------------------------------------|
-| Trips by Time of Day          | Distribution of Trip Durations                        |
-
-| ![Trips by Weekday](figures/trips_by_weekday.png)| ![Top Start Stations Map](figures/map.png) |
-|------------------------------------------------------------|--------------------------------------------------------------|
-| Trips by Weekday                                           |Top Start Stations (Map)                       |
-
 ## Analysis Details (SQL Walkthroughs)
 
 ### Which is the most popular Bikeshare starting station in April 2025?
