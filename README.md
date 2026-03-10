@@ -154,20 +154,6 @@ These enhancements position the project for scalable cloud analytics while maint
 
 The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
-GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
-
-[![Heatmap Screenshot](screenshot_heatmap.png)](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html)
-
-Open the interactive output directly: [View interactive heatmap](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
-
-To preview locally in a browser:
-
-```bash
-python -m http.server 8000
-```
-
-Then open `http://localhost:8000/heatmap.html`.
-
 This project was significantly enhanced in May 2025 with the following additions:
 
 * Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
@@ -208,10 +194,6 @@ The project has been further extended with cloud-based analytics and improved te
 * **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
 
 These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
-
-## BigQuery Heatmap Showcase
-
-The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
 # Visual Summary
 
