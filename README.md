@@ -117,11 +117,11 @@ These enhancements position the project for scalable cloud analytics while maint
 
 ## BigQuery Heatmap Showcase
 
-The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](heatmap.html).
+The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
 GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
 
-Open the interactive output directly: [View interactive heatmap](heatmap.html).
+Open the interactive output directly: [View interactive heatmap](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
 To preview locally in a browser:
 
