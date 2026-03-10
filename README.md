@@ -1,22 +1,39 @@
-# Introduction
+# Capital Bikeshare (April 2025) — SQL + Python Analysis (SQLite + BigQuery)
 
-The dataset comes from Capital Bikeshare raw data available on their website (https://capitalbikeshare.com/system-data). Capital Bikeshare is MetroDC's bike sharing system. The network covers more than 700 stations and 6000 bikes. The available data is updated every month and includes trip duration, start date, end date, start station, end station, bike number and member type. This project focuses on April 2025 trip data and analyzes it using two complementary workflows:
+## Overview
+This project analyzes **Capital Bikeshare trip data for April 2025** to understand usage patterns across stations, routes, time of day, trip duration, weekday, and rider type.
 
-* a local SQLite workflow (`sql_scripts/` + `python_scripts/`) for reproducible offline analysis
-* a cloud BigQuery workflow (`bigquery_queries/`) for scalable querying and interactive map outputs
+Data source: Capital Bikeshare system data (monthly raw trip data): https://capitalbikeshare.com/system-data
 
-This analysis aims to answer key questions such as:
-* which stations and routes are most used?
-* what time of day are rides most frequent?
-* how long are the trips?
-* how does usage vary by weekday?
-* who uses the system more - casual riders or members?
+The repo supports two complementary workflows:
+- **SQLite (local, reproducible)**: run SQL locally and generate static plots/maps  
+  (`sql_scripts/` + `python_scripts/`)
+- **BigQuery (cloud, scalable + interactive outputs)**: query in BigQuery, export CSV, and generate interactive outputs  
+  (`bigquery_queries/`)
 
-The queries below build a picture of how Capital Bikeshare is used throughout a typical spring month.
+---
 
-# Set-up Instructions
+## Questions Answered
+- Which stations and routes are most used?
+- What time of day are rides most frequent?
+- How long are the trips?
+- How does usage vary by weekday?
+- Who uses the system more: casual riders or members?
 
-1. Create/activate your virtual environment and install dependencies:
+---
+
+## Repository Layout
+- `sql_scripts/` — SQL queries against the `trips` table (SQLite workflow)
+- `python_scripts/` — SQLite query runners + plotting/map utilities (outputs saved to `figures/`)
+- `bigquery_queries/` - BigQuery workflow scripts/notebook + interactive plotting/app
+- `figures/` - generated static charts/maps
+- `tests/` - tests that validate key outputs are produced
+- `.github/workflows/ci.yml` - CI pipeline for linting + tests
+
+---
+
+## Setup (Python)
+Create/activate a virtual environment and install dependencies:
 
 ```bash
 python -m venv .venv
@@ -24,8 +41,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Run quality checks and tests:
-
+### Quality checks + tests
 ```bash
 ruff check . --fix
 black .
@@ -33,214 +49,140 @@ flake8 .
 pytest tests/
 ```
 
-3. SQLite workflow (local analysis):
+---
 
-* SQL query files are in `sql_scripts/` and use the `trips` table.
-* Plot/map generation utilities are in `python_scripts/` with outputs saved to `figures/`.
+## Workflow A: SQLite (Local Analysis)
+The SQLite workflow is designed for portable, offline analysis using a local database.
 
-4. BigQuery workflow (cloud analysis + interactive heatmap):
+- SQL query files live in `sql_scripts/` and assume a `trips` table.
+- Plot/map generation utilities are in `python_scripts/`.
+- Outputs are saved to `figures/`.
 
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp_key.json
-export BQ_PROJECT_ID=capitalbikeshare-489408
-export BQ_TABLE_ID=capitalbikeshare-489408.02_2026.tripdata
-# optional: export BQ_OUTPUT_CSV=tripdata.csv
-python bigquery_queries/scripts.py
-python bigquery_queries/plotting.py
-```
+Typical flow:
+1. Load/build the SQLite database containing the `trips` table (see repo scripts/config for the expected DB path).
+2. Run SQL scripts in `sql_scripts/` against that database.
+3. Use `python_scripts/` to generate plots and maps from query outputs.
 
-This produces `tripdata.csv` (query output) and `heatmap.html` (interactive Plotly map).
+---
 
-5. Optional interactive app:
+## Workflow B: BigQuery (Cloud Analysis + Heatmap)
+The BigQuery workflow supports scalable querying, then exports results (optionally to CSV) to power plotting and an interactive map.
 
-```bash
-streamlit run bigquery_queries/app.py
-```
-
-
-
-2. Run quality checks and tests:
-
-```bash
-ruff check . --fix
-black .
-flake8 .
-pytest tests/
-```
-
-3. SQLite workflow (local analysis):
-
-* SQL query files are in `sql_scripts/` and use the `trips` table.
-* Plot/map generation utilities are in `python_scripts/` with outputs saved to `figures/`.
-
-4. BigQuery workflow (cloud analysis + interactive heatmap):
+Set environment variables and run the BigQuery scripts:
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp_key.json
 export BQ_PROJECT_ID=capitalbikeshare-489408
 export BQ_TABLE_ID=capitalbikeshare-489408.02_2026.tripdata
 # optional: export BQ_OUTPUT_CSV=tripdata.csv
+
 python bigquery_queries/scripts.py
 python bigquery_queries/plotting.py
 ```
 
-This produces `tripdata.csv` (query output) and `heatmap.html` (interactive Plotly map).
+This produces:
+- `tripdata.csv` (optional query output, depending on configuration)
+- `heatmap.html` (interactive Plotly map)
 
-5. Optional interactive app:
-
+### Optional interactive app
 ```bash
 streamlit run bigquery_queries/app.py
 ```
 
+---
 
-# SQL and Engineering Skills Demonstrated
-
-* Filtering and cleaning data using `WHERE`, `IS NOT NULL`, and outlier logic
-* Aggregation with `GROUP BY`, `COUNT`, and `AVG`
-* Time-series analysis using `strftime()` and `julianday()`
-* Categorisation with `CASE WHEN`
-* Subqueries and nested `SELECT` statements
-* Python-based query execution and transformation pipelines for SQLite and BigQuery outputs
-* Automated test validation of plot creation using `pytest`
-* Code formatting and linting with `black`, `flake8`, and `ruff`
-* CI/CD integration with GitHub Actions (`.github/workflows/ci.yml`)
-
-SQLite was selected for simple, portable local analysis and reproducible SQL exploration. BigQuery was added to support larger-scale cloud querying and faster iteration over grouped spatial outputs. Visualisations are generated with matplotlib and folium for the SQLite workflow, and with Plotly/Folium for the BigQuery workflow. Outputs are saved in `figures/` (static images/maps) and `heatmap.html` (interactive output).
-
-# Project Updates
-
-This project was significantly enhanced in May 2025 with the following additions:
-
-* Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
-* Automated plot generation for all major SQL outputs
-* `pytest`-based test suite to ensure figures are created and contain data
-* CI/CD integration using GitHub Actions (`.github/workflows/ci.yml`) to automate lint checks and test execution
-* Code formatting (`black`) and linting (`flake8`, `ruff`) configured and documented
-* Logical file structure:
-  - `python_scripts/`: plotting and SQL query logic
-  - `tests/`: validation of script outputs
-  - `figures/`: generated charts and maps
-
-These improvements make the project reproducible, extendable, and more maintainable for future updates and analyses.
-
-## March 2026: BigQuery Integration & Enhanced Workflows
-
-The project has been further extended with cloud-based analytics and improved testing infrastructure:
-
-### BigQuery Integration
-* **Cloud-ready query workflow**: BigQuery query execution is implemented in `bigquery_queries/scripts.py` and demonstrated in `bigquery_queries/eda.ipynb`
-* **Python query execution**: `scripts.py` reads `BQ_PROJECT_ID`, `BQ_TABLE_ID`, and optional `BQ_OUTPUT_CSV`, runs a grouped BigQuery query (weekday/member/location trip counts), and saves results for downstream plotting
-* **Interactive exploration**: Jupyter notebook (`eda.ipynb`) demonstrates how to execute queries, process results, and generate visualizations interactively
-* **Visualisation pipeline**: `plotting.py` and `app.py` transform BigQuery CSV outputs into interactive HTML maps/charts using Plotly and Folium
-
-### CSV-Based Workflow
-* **Decoupled data and visualisation**: The BigQuery workflow writes query results to CSV (`tripdata.csv`) so plotting can run offline
-* **Portable outputs**: Generated CSV artifacts can be version-controlled, shared, and reused without re-running expensive queries
-* **Local and cloud flexibility**: Plots can be generated from either SQLite (local) or BigQuery (cloud) data sources
-
-### Enhanced Modularity
-* **Separation of concerns**: Query logic, data processing, and visualisation are isolated in dedicated modules
-* **Reusable components**: Functions in `scripts.py` and `plotting.py` support multiple query types and output formats
-* **Configuration management**: Centralized `config.py` ensures consistent paths across local and CI environments
-
-### Robust Testing & CI
-* **Expanded test coverage**: Tests validate plotting functions, HTML/PNG artifact creation, and BigQuery plotting module imports
-* **Import path resolution**: `conftest.py` ensures `config.py` and project modules are discoverable in all environments (local, Docker, GitHub Actions)
-* **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
-
-These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
-
-## BigQuery Heatmap Showcase
-
-The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
-
-GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
-
-[![Heatmap Screenshot](screenshot_heatmap.png)](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html)
-
-Open the interactive output directly: [View interactive heatmap](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
-
-To preview locally in a browser:
-
-```bash
-python -m http.server 8000
-```
-
-Then open `http://localhost:8000/heatmap.html`.
-
-This project was significantly enhanced in May 2025 with the following additions:
-
-* Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
-* Automated plot generation for all major SQL outputs
-* `pytest`-based test suite to ensure figures are created and contain data
-* CI/CD integration using GitHub Actions (`.github/workflows/ci.yml`) to automate lint checks and test execution
-* Code formatting (`black`) and linting (`flake8`, `ruff`) configured and documented
-* Logical file structure:
-  - `python_scripts/`: plotting and SQL query logic
-  - `tests/`: validation of script outputs
-  - `figures/`: generated charts and maps
-
-These improvements make the project reproducible, extendable, and more maintainable for future updates and analyses.
-
-## March 2026: BigQuery Integration & Enhanced Workflows
-
-The project has been further extended with cloud-based analytics and improved testing infrastructure:
-
-### BigQuery Integration
-* **Cloud-ready query workflow**: BigQuery query execution is implemented in `bigquery_queries/scripts.py` and demonstrated in `bigquery_queries/eda.ipynb`
-* **Python query execution**: `scripts.py` reads `BQ_PROJECT_ID`, `BQ_TABLE_ID`, and optional `BQ_OUTPUT_CSV`, runs a grouped BigQuery query (weekday/member/location trip counts), and saves results for downstream plotting
-* **Interactive exploration**: Jupyter notebook (`eda.ipynb`) demonstrates how to execute queries, process results, and generate visualizations interactively
-* **Visualisation pipeline**: `plotting.py` and `app.py` transform BigQuery CSV outputs into interactive HTML maps/charts using Plotly and Folium
-
-### CSV-Based Workflow
-* **Decoupled data and visualisation**: The BigQuery workflow writes query results to CSV (`tripdata.csv`) so plotting can run offline
-* **Portable outputs**: Generated CSV artifacts can be version-controlled, shared, and reused without re-running expensive queries
-* **Local and cloud flexibility**: Plots can be generated from either SQLite (local) or BigQuery (cloud) data sources
-
-### Enhanced Modularity
-* **Separation of concerns**: Query logic, data processing, and visualisation are isolated in dedicated modules
-* **Reusable components**: Functions in `scripts.py` and `plotting.py` support multiple query types and output formats
-* **Configuration management**: Centralized `config.py` ensures consistent paths across local and CI environments
-
-### Robust Testing & CI
-* **Expanded test coverage**: Tests validate plotting functions, HTML/PNG artifact creation, and BigQuery plotting module imports
-* **Import path resolution**: `conftest.py` ensures `config.py` and project modules are discoverable in all environments (local, Docker, GitHub Actions)
-* **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
-
-These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
-
-## BigQuery Heatmap Showcase
-
-The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
-
-# Visual Summary
-
+## Visual Summary
 | ![Trips by Hour](figures/trips_by_hour.png) | ![Trip Duration Histogram](figures/trip_duration_distribution.png) |
-|---------------------------------------------|---------------------------------------------------------------------|
-| Trips by Time of Day          | Distribution of Trip Durations                        |
+|---|---|
+| Trips by Time of Day | Distribution of Trip Durations |
 
-| ![Trips by Weekday](figures/trips_by_weekday.png)| ![Top Start Stations Map](figures/map.png) |
-|------------------------------------------------------------|--------------------------------------------------------------|
-| Trips by Weekday                                           |Top Start Stations (Map)                       |
+| ![Trips by Weekday](figures/trips_by_weekday.png) | ![Top Start Stations Map](figures/map.png) |
+|---|---|
+| Trips by Weekday | Top Start Stations (Map) |
 
+### BigQuery heatmap showcase
+![BigQuery Heatmap Screenshot](screenshot_heatmap.png)
 
+The interactive heatmap generated from the BigQuery workflow is saved as `heatmap.html`.  
+If you want a quick browser preview without cloning, you can use an HTML preview service (as long as `heatmap.html` is accessible from the repo).
 
+---
 
-# Which is the most popular Bikeshare starting station in April 2025?
+## SQL & Engineering Skills Demonstrated
+- Filtering/cleaning: `WHERE`, `IS NOT NULL`, basic outlier logic
+- Aggregation: `GROUP BY`, `COUNT`, `AVG`
+- Time-series analysis: `strftime()`, `julianday()`
+- Categorization: `CASE WHEN`
+- Subqueries and nested `SELECT`s
+- Python-based pipelines for SQLite + BigQuery outputs
+- Automated testing with `pytest`
+- Formatting/linting: `black`, `flake8`, `ruff`
+- CI with GitHub Actions (`.github/workflows/ci.yml`)
 
-The goal is to identify the 10 most popular starting stations in April 2025. To achieve this, the ```SELECT```statement
-retrieves each unique `start_station_name` and counts how many trips started there - that count is
-labelled `trip_count`. The data is drawn from the `trips` table. Then, all rows are aggregated by starting station
-name, so we can count how many trips began at each station. The results are ordered in **descending order**
-using `ORDER BY` and the result is limited to the 10 top most used starting stations with `LIMIT`.
-When the query was first run, **180038 trips** had NULL values for the starting station, skewing the results. Accuracy
-is improved by excluding NULL values with a `WHERE` clause. However, given the very large number of NULL values, there
-might be an error in the data collection process, and any analysis based on station names should be interpreted with caution.
+---
 
-## Query
+## Project Updates
 
+### May 2025: Reproducibility + CI Improvements
+This project was significantly enhanced in May 2025 with the following additions:
+
+- Central `config.py` for setting global paths (e.g., `FIGURES_DIR`, database location)
+- Automated plot generation for all major SQL outputs
+- `pytest`-based test suite to ensure figures are created and contain data
+- CI/CD integration using GitHub Actions (`.github/workflows/ci.yml`) to automate lint checks and test execution
+- Code formatting (`black`) and linting (`flake8`, `ruff`) configured and documented
+- Logical file structure:
+  - `python_scripts/`: plotting and SQL query logic
+  - `tests/`: validation of script outputs
+  - `figures/`: generated charts and maps
+
+These improvements make the project reproducible, extendable, and more maintainable for future updates and analyses.
+
+### March 2026: BigQuery Integration & Enhanced Workflows
+The project has been further extended with cloud-based analytics and improved testing infrastructure:
+
+#### BigQuery Integration
+- **Cloud-ready query workflow**: BigQuery query execution is implemented in `bigquery_queries/scripts.py` and demonstrated in `bigquery_queries/eda.ipynb`
+- **Python query execution**: `scripts.py` reads `BQ_PROJECT_ID`, `BQ_TABLE_ID`, and optional `BQ_OUTPUT_CSV`, runs a grouped BigQuery query (weekday/member/location trip counts), and saves results for downstream plotting
+- **Interactive exploration**: Jupyter notebook (`eda.ipynb`) demonstrates how to execute queries, process results, and generate visualizations interactively
+- **Visualisation pipeline**: `plotting.py` and `app.py` transform BigQuery CSV outputs into interactive HTML maps/charts using Plotly and Folium
+
+#### CSV-Based Workflow
+- **Decoupled data and visualisation**: the BigQuery workflow writes query results to CSV (`tripdata.csv`) so plotting can run offline
+- **Portable outputs**: generated CSV artifacts can be version-controlled, shared, and reused without re-running expensive queries
+- **Local and cloud flexibility**: plots can be generated from either SQLite (local) or BigQuery (cloud) data sources
+
+#### Enhanced Modularity
+- **Separation of concerns**: query logic, data processing, and visualisation are isolated in dedicated modules
+- **Reusable components**: functions in `scripts.py` and `plotting.py` support multiple query types and output formats
+- **Configuration management**: centralized `config.py` ensures consistent paths across local and CI environments
+
+#### Robust Testing & CI
+- **Expanded test coverage**: tests validate plotting functions, HTML/PNG artifact creation, and BigQuery plotting module imports
+- **Import path resolution**: `conftest.py` ensures `config.py` and project modules are discoverable in all environments (local, Docker, GitHub Actions)
+- **Automated quality checks**: GitHub Actions workflow runs `pytest`, `black`, `flake8`, and `ruff` on every commit to maintain code quality and prevent regressions
+
+These enhancements position the project for scalable cloud analytics while maintaining local development flexibility and comprehensive automated testing.
+
+---
+
+## Analysis Details (SQL Walkthroughs)
+
+### Which is the most popular Bikeshare starting station in April 2025?
+The goal is to identify the 10 most popular starting stations in April 2025. To achieve this, the `SELECT` statement
+retrieves each unique `start_station_name` and counts how many trips started there — that count is
+labelled `trip_count`. The data is drawn from the `trips` table.
+
+All rows are grouped by starting station name (`GROUP BY`) so we can count how many trips began at each station.
+The results are ordered in **descending order** using `ORDER BY`, and the result is limited to the 10 most-used starting stations with `LIMIT`.
+
+When the query was first run, **180,038 trips** had NULL values for the starting station, skewing the results.
+Accuracy is improved by excluding NULL values with a `WHERE` clause. However, given the very large number of NULL values,
+there might be an issue in the data collection process, and any analysis based on station names should be interpreted with caution.
+
+#### Query
 ```sql
-SELECT start_station_name, 
+SELECT start_station_name,
        COUNT(*) AS trip_count
 FROM trips
 WHERE start_station_name IS NOT NULL
@@ -249,11 +191,10 @@ ORDER BY trip_count DESC
 LIMIT 10;
 ```
 
-## Results
-
+#### Results
 **Table 1** identifies the 10 most popular starting stations in April 2025 by trip count. The map in **Figure 1** shows where they are in the city.
 
-**Table 1:**  The 10 most popular starting stations in April 2025.
+**Table 1:** The 10 most popular starting stations in April 2025.
 
 | Starting Station                | Trip Count |
 |---------------------------------|------------|
@@ -268,23 +209,20 @@ LIMIT 10;
 | M St & Delaware Ave NE          | 3341       |
 | 14th & R St NW                  | 3166       |
 
-![Map of Most Popular Starting Stations](figures/map.png)
+![Map of Most Popular Starting Stations](figures/map.png)  
 **Figure 1:** The 10 most popular starting stations in April 2025.
 
-The popularity of these stations can be explained by their proximity to major activity hubs. Columbus Circle/Union Station is the city's main intermodal hub so it is a natural starting point for commuters and tourists. Three of the top ten are at residential-commercial border zones (New Hampsire Ave & T St NW, 14th & V St NW and 14th & R St NW). Three sit on the edge of core business districts, so they should be popular with commuters (5th & K St NW, 15th & P St NW and 1st & M St NW).  The civic and tourist areas affect the popularity of Eastern Market Metro and Adams Mill & Columbia Rd MW. Then M St & Delaware Ave NW serves densely populated neighbourhoods and likely functions as a residential-metro connector.
+The popularity of these stations can be explained by their proximity to major activity hubs. Columbus Circle/Union Station is the city’s main intermodal hub, so it is a natural starting point for commuters and tourists. Several of the other top stations sit at the edges of business districts or dense residential-commercial corridors, making them likely “connector” stations between Metro stops, workplaces, and neighborhood destinations.
 
-# What are the  most frequent trip pairs (origin-destination)?
+---
 
-The goal is to identify the ten most common trip pairs. Since the data includes many entries where the start_station
-and/or end_station is empty (i.e. NULL), these must be excluded from the dataset first to leave us with valid, complete
-routes only. We start by selecting the origin station, destination station and counts of those trips from the full trips
-table (`FROM trips`). We filter out rows with missing start or end stations names
-using `WHERE...IS NOT NULL AND ...IS NOT NULL`. We group the data by each unique start and end station
-pair (`GROUP BY`) to count the trip frequency for each route, then sort the frequency of the trip pairs from most to
-least (`ORDER BY trip_count DESC`), and limit the result to the top 10 most common trip pairs.
+### What are the most frequent trip pairs (origin–destination)?
+The goal is to identify the ten most common trip pairs. Since the data includes many entries where the start station and/or end station is missing (i.e. NULL), these must be excluded first to leave only valid, complete routes.
 
-## Query
+We select the origin station, destination station, and counts of those trips from the `trips` table.
+We filter out rows with missing station names using `WHERE ... IS NOT NULL`. Then we group by each unique start/end pair (`GROUP BY`) to count trip frequency, sort from most to least common (`ORDER BY trip_count DESC`), and limit to the top 10 (`LIMIT 10`).
 
+#### Query
 ```sql
 SELECT
   start_station_name,
@@ -298,9 +236,8 @@ ORDER BY trip_count DESC
 LIMIT 10;
 ```
 
-## Results
-
-While Columbus Circle/Union Station is the most popular starting station, it does not dominate the trip pairs because - like from other major hubs - it disperses across different destinations.  The top pairs are frequently round drips (e.g. Gravelly Point, Jefferson Dr & 14th St SW), suggesting recreational use or circular routes.  Other high-ranking pairs connect closely located, well-trafficked areas (Capitol Hill - Eastern Market) suggestive of a mix of commuting, tourism and leisure across the city.
+#### Results
+While Columbus Circle/Union Station is the most popular starting station, it does not dominate the trip pairs because — like other major hubs — it disperses across many destinations. Several of the most frequent pairs are “round trips” (start and end at the same station), which suggests recreational use or short errands. Other high-ranking pairs connect closely located, well-trafficked areas, suggesting a mix of commuting, tourism, and leisure.
 
 **Table 2:** The 10 most common trip pairs in April 2025.
 
@@ -317,16 +254,14 @@ While Columbus Circle/Union Station is the most popular starting station, it doe
 | Eastern Market Metro                                  | Lincoln Park / 13th & East Capitol St NE              | 247        |
 | 4th St & Madison Dr NW                                | 4th St & Madison Dr NW                                | 240        |
 
+---
 
-# Which time of day is most popular?
+### Which time of day is most popular?
+To analyze ride activity by time of day, we extract the hour from each ride’s start timestamp and count trips per hour.
 
-To analyse ride activity by time of day, the hour alone is extracted from each ride's start time. The times are given as
-standard ISO 8601 timestamps with milliseconds e.g. **2025-04-30 23:59:58.007** but here, we are only interesteed in the
-**hour of day** when the ride started. The SQLite function `sql strftime('%H', started_at)` extracts the hour in
-24-hour format from each timestamp and the result as called "hour" using `AS hour`.
+The timestamps are ISO-like datetime strings with milliseconds (e.g. `2025-04-30 23:59:58.007`), but for this analysis we only need the **hour of day**. SQLite’s `strftime('%H', started_at)` extracts the hour (00–23).
 
-## Query
-
+#### Query
 ```sql
 SELECT strftime('%H', started_at) AS hour, COUNT(*) AS trip_count
 FROM trips
@@ -334,62 +269,45 @@ GROUP BY hour
 ORDER BY hour;
 ```
 
-## Results
+#### Results
+There are two peak periods that line up with commuting patterns: **morning (7–9 AM)** and **late afternoon (4–6 PM)**.
 
-There are two sets of peak hours what coincide with peak commuting times: 4-6 PM and 7-9 AM.
-
-![Most Popular Hour](figures/trips_by_hour.png)
+![Most Popular Hour](figures/trips_by_hour.png)  
 **Figure 2:** The most popular hour of day in April 2025.
 
-# How long is the average trip?
+---
 
-In general terms, the average trip duration (minutes) is calculated as follows:
-`average_duration_minutes = average(end_time - start_time) * conversion_factor_from_days_to_minutes `
+### How long is the average trip?
+The average trip duration (in minutes) can be computed by subtracting start time from end time, converting the difference from days to minutes, and averaging across all trips.
 
-## Query
+SQLite’s `julianday(datetime)` converts timestamps to a Julian day number. Subtracting two Julian day values gives a duration in **days**, so we multiply by `1440` (24 * 60) to convert to minutes. We round to one decimal place for readability.
 
+#### Query
 ```sql
 SELECT
   ROUND(AVG((julianday(ended_at) - julianday(started_at)) * 1440), 1) AS avg_trip_minutes
 FROM trips;
 ```
 
-Firstly, to subtract days from each other, the timestamp must be converted into a Julian day number
-with `julianday(datetime)`. However, this gives the duration in days as a floating point number, so we have to
-convert it to minutes. To do so, we multiply by 24 hours * 60 minutes = `1440`. Then, `AVG()` calculates the average
-duration across all trips as float with many trailing decimals. Therefore, we apply `ROUND(AVG(),1)` to round the
-average duration to one decimal place.
+#### Results
+The mean trip duration is **16.1 minutes**. Since the mean is sensitive to outliers, the next section looks at the full distribution.
 
-## Results
+---
 
-The mean trip duration is 16.1 minutes. Since the mean is sensitive to outliers, let's look at the distribution of
-trip durations.
+### What is the distribution of trip durations (short, medium and long)?
+The goal is to group bike trips into duration categories and count how many fall into each category. The results are shown as a histogram.
 
-# What is the distribution of trip durations (short, medium and long)?
+We first compute duration in minutes in a subquery. Then an outer query uses a `CASE` expression to bin trips into labeled categories and counts how many fall into each bin.
 
-The goal is to group the bike trips into duration categories and count how many fall into each category. The results are
-shown as a histogram.
-
-## Query
-
-The query contains a subquery:
-
+#### Query (subquery)
 ```sql
-SELECT 
+SELECT
   (julianday(ended_at) - julianday(started_at)) * 1440 AS duration_min
 FROM trips
 WHERE started_at IS NOT NULL AND ended_at IS NOT NULL
 ```
 
-The subquery calcluates trip duration in minutes by subtracting start from end times using `julianday()` and by
-converting from days to minutes. Rows with missing values (NULL) in the start and/or end times are filtered out and the
-result is a temporary table aliased `sub`.
-
-The outer query deals with `CASE` expression which categorises the trips according to a labelled duration
-bin. `CASE` is evaluated sequentially, so the conditions are ordered from smallest to largest
-threshold. `COUNT(*)` counts the number of trips in each category, and the result is grouped by ``duration_category``
-and sorted from most to least frequent.
-
+#### Query (full)
 ```sql
 SELECT
   CASE
@@ -400,7 +318,7 @@ SELECT
   END AS duration_category,
   COUNT(*) AS trip_count
 FROM (
-  SELECT 
+  SELECT
     (julianday(ended_at) - julianday(started_at)) * 1440 AS duration_min
   FROM trips
   WHERE started_at IS NOT NULL AND ended_at IS NOT NULL
@@ -409,27 +327,24 @@ GROUP BY duration_category
 ORDER BY trip_count DESC;
 ```
 
-Note that this query does not address outliers but, even if a maximum time limit of 2 hours is applied, 3723 trips are
-excluded, amounting to only 0.56% of all trips.
+#### Results
+The most common ride duration is **5–15 minutes**.
 
-## Results
-
-The most common ride duration is 5-15 minutes.
-![Trip Duration Histogram](figures/trip_duration_distribution.png)
+![Trip Duration Histogram](figures/trip_duration_distribution.png)  
 **Figure 3:** Histogram of trip durations in April 2025.
 
-# Which day of the week has the most trips?
+Note: even if a maximum duration threshold of 2 hours is applied, **3,723 trips** are excluded (about **0.56%** of all trips), so the overall shape is robust to trimming extreme outliers.
 
-The goal is to identify which days of the week have the most trips. The day of the week is based on the day on which the
-journey started `started_at`). The week starts on a Sunday, so the results are returned as 0 for Sunday through to 6
-for Saturday.
+---
 
-## Query
+### Which day of the week has the most trips?
+The goal is to identify which days of the week have the most trips, based on the day the journey started (`started_at`).
 
-The query groups the trips by day of the week and counts the number of trips for each day.
+SQLite’s `strftime('%w', started_at)` returns weekday codes with **0 = Sunday** through **6 = Saturday**.
 
+#### Query (ordered by trip volume)
 ```sql
-SELECT 
+SELECT
   strftime('%w', started_at) AS weekday,
   COUNT(*) AS trip_count
 FROM trips
@@ -437,16 +352,16 @@ WHERE started_at IS NOT NULL
 GROUP BY weekday
 ORDER BY trip_count DESC;
 ```
-Alternatively, the results can be returned by day of the week Monday to Sunday, rather than by number of trips:
 
+#### Query (ordered Monday → Sunday)
 ```sql
-SELECT 
+SELECT
   strftime('%w', started_at) AS weekday,
   COUNT(*) AS trip_count
 FROM trips
 WHERE started_at IS NOT NULL
 GROUP BY weekday
-ORDER BY 
+ORDER BY
   CASE strftime('%w', started_at)
     WHEN '1' THEN 1  -- Monday
     WHEN '2' THEN 2
@@ -458,10 +373,8 @@ ORDER BY
   END;
 ```
 
-## Results
-
-The following results table is ordered by the number of trips, and it was manually altered for readability. I.e. "Sunday"
-is listed instead of "0" and so on.
+#### Results
+The results below are ordered by the number of trips (and the weekday labels were manually written out for readability).
 
 **Table 3:** Number of trips per weekday in April 2025.
 
@@ -475,18 +388,19 @@ is listed instead of "0" and so on.
 | Friday    | 83013           |
 | Monday    | 79663           |
 
-If the results are ordered from Monday to Sunday instead - see the **Figure 4** below.
+If you view the chart ordered Monday-to-Sunday, the midweek peak becomes especially clear:
 
-![Number of Trips per Weekday in April 2025](figures/trips_by_weekday.png)
+![Number of Trips per Weekday in April 2025](figures/trips_by_weekday.png)  
 **Figure 4:** Number of trips per weekday in April 2025.
 
-# What share of rides are taken by members vs casual ride sharers?
+---
 
-Journeys are grouped by whether the rider is a member of the bike sharing service or not. The goal is to identify
-which group has the most trips.
+### What share of rides are taken by members vs casual ride sharers?
+Journeys are grouped by whether the rider is a member of the bikeshare service or not. The goal is to quantify both the trip counts and the share of total rides.
 
-## Query
+We count trips per rider type and compute percentages relative to total trips. Using `100.0 * ...` ensures floating-point division (not integer division).
 
+#### Query
 ```sql
 SELECT
   member_casual,
@@ -496,13 +410,8 @@ FROM trips
 GROUP BY member_casual;
 ```
 
-We `count` the trips per rider type, calling it `trip_count` and `(SELECT COUNT(*) FROM trips)` gets the total
-number of trips in the dataset trips. Since it a percentage calculation, we use `ROUND(...,1)` to round it to one
-decimal place. Using `100.0*...` ensures floating-point division as opposed to integer division.
-
-## Results
-
-The overwhelming majority of rides are taken by members (more than 70%).
+#### Results
+The overwhelming majority of rides are taken by members (**70.2%**).
 
 **Table 4:** Percentage of rides taken by members vs casual riders in April 2025.
 
@@ -511,15 +420,15 @@ The overwhelming majority of rides are taken by members (more than 70%).
 | casual     | 198192          | 29.8                |
 | member     | 466007          | 70.2                |
 
+---
 
-# Conclusion
+## Conclusion
 This exploratory analysis of Capital Bikeshare trips in April 2025 revealed several interesting insights:
 
-* most trips are short: the average trip duration is 16.1 minutes and most trips are  5-15 minutes long
-* the most popular starting stations are Columbus Circle / Union Station but no single origin-destination route dominates
-* Tuesday and Wednesdays are the busiest days, whereas Monday and Friday have the fewest trips
-* most users are members who account for over 70% of all trips
-* the volume peak occurs between 4-6 PM and 7-9 AM, coinciding with peak commuting hours
+- Most trips are short: the average trip duration is **16.1 minutes** and most trips are **5–15 minutes** long
+- The most popular starting station is **Columbus Circle / Union Station**, but no single origin–destination route dominates
+- **Tuesdays and Wednesdays** are the busiest days, whereas **Mondays and Fridays** have the fewest trips
+- Most users are **members**, accounting for **~70%** of all trips
+- Trip volume peaks around commuting windows (**7–9 AM** and **4–6 PM**)
 
 This type of SQL-based analysis supports better understanding of bike-sharing patterns and could be extended to seasonal trends, user segmentation, or operational decisions such as station rebalancing.
-
