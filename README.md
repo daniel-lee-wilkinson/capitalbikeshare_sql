@@ -84,7 +84,7 @@ This produces:
 - `tripdata.csv` (optional query output, depending on configuration)
 - `heatmap.html` (interactive Plotly map)
 
-### Optional interactive app
+### Optional Interactive App
 ```bash
 streamlit run bigquery_queries/app.py
 ```
