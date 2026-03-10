@@ -90,7 +90,6 @@ streamlit run bigquery_queries/app.py
 ```
 
 ---
-
 ### BigQuery heatmap showcase
 ![BigQuery Heatmap Screenshot](screenshot_heatmap.png)
 
