@@ -11,3 +11,5 @@ db-dtypes
 geopandas
 folium
 streamlit_folium
+streamlit
+plotly
