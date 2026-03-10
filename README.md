@@ -119,18 +119,6 @@ These enhancements position the project for scalable cloud analytics while maint
 
 The interactive heatmap generated from the BigQuery workflow is saved as [heatmap.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
 
-GitHub strips `<iframe>` content in README files, so the map cannot be embedded inline here.
-
-Open the interactive output directly: [View interactive heatmap](https://htmlpreview.github.io/?https://raw.githubusercontent.com/daniel-lee-wilkinson/capitalbikeshare_sql/bigquery/heatmap.html).
-
-To preview locally in a browser:
-
-```bash
-python -m http.server 8000
-```
-
-Then open `http://localhost:8000/heatmap.html`.
-
 # Visual Summary
 
 | ![Trips by Hour](figures/trips_by_hour.png) | ![Trip Duration Histogram](figures/trip_duration_distribution.png) |
