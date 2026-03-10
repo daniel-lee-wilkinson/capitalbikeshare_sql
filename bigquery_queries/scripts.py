@@ -1,16 +1,30 @@
+import os
+
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
-# important: Ensure that the service account key file is securely stored and not
-# exposed in version control or public repositories.
 
-# query BigQuery using the service account credentials
+def _get_env(name: str, default: str | None = None) -> str:
+    value = os.getenv(name, default)
+    if value is None or value.strip() == "":
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
 
-credentials = service_account.Credentials.from_service_account_file("/tmp/gcp_key.json")
 
-client = bigquery.Client(project="capitalbikeshare-489408", credentials=credentials)
+def create_client(project_id: str) -> bigquery.Client:
+    # If GOOGLE_APPLICATION_CREDENTIALS is set, use it explicitly.
+    # Otherwise, fall back to Application Default Credentials.
+    credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if credentials_path:
+        credentials = service_account.Credentials.from_service_account_file(
+            credentials_path
+        )
+        return bigquery.Client(project=project_id, credentials=credentials)
+    return bigquery.Client(project=project_id)
 
-query = """
+
+def build_query(table_id: str) -> str:
+    return f"""
 SELECT
   FORMAT_DATE('%A', DATE(started_at)) AS weekday,
   EXTRACT(DAYOFWEEK FROM started_at) AS weekday_order,
@@ -18,7 +32,7 @@ SELECT
   start_lat,
   start_lng,
   COUNT(*) AS trip_count
-FROM `capitalbikeshare-489408.02_2026.tripdata`
+FROM `{table_id}`
 WHERE
   started_at IS NOT NULL
   AND start_lat IS NOT NULL
@@ -27,6 +41,19 @@ GROUP BY weekday, weekday_order, member_casual, start_lat, start_lng
 ORDER BY weekday_order, trip_count DESC
 """
 
-df = client.query(query).to_dataframe()
-# Save once
-df.to_csv("tripdata.csv", index=False)
+
+def main():
+    project_id = _get_env("BQ_PROJECT_ID", os.getenv("GOOGLE_CLOUD_PROJECT"))
+    table_id = _get_env("BQ_TABLE_ID")
+    output_csv = os.getenv("BQ_OUTPUT_CSV", "tripdata.csv")
+
+    client = create_client(project_id)
+    query = build_query(table_id)
+
+    df = client.query(query).to_dataframe()
+    df.to_csv(output_csv, index=False)
+    print(f"Saved {len(df)} rows to {output_csv}")
+
+
+if __name__ == "__main__":
+    main()
