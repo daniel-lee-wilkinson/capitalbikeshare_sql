@@ -35,7 +35,7 @@ The repo supports two complementary workflows:
 - How does usage vary by weekday?
 - Who uses the system more: casual riders or members?
 
-➡️ **See [ANALYSIS.md](ANALYSIS.md) for the full SQL walkthroughs, query explanations, and result tables.**
+**See [ANALYSIS.md](ANALYSIS.md) for the full SQL walkthroughs, query explanations, and result tables.**
 
 ---
 
