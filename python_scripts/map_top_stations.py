@@ -2,9 +2,7 @@ import folium
 import pandas as pd
 
 # Load data
-df = pd.read_csv(
-    "C:/Users/danie/PycharmProjects/capitalbikeshare_sql/processed_data/top_stations.csv"
-)
+df = pd.read_csv("processed_data/top_stations.csv")
 
 # Create base map centered on DC
 m = folium.Map(location=[38.9, -77.03], zoom_start=13)
